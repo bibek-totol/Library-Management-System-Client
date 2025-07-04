@@ -89,13 +89,10 @@ export default function BookList() {
   };
 
   return (
-    <div className="p-4 w-full mt-20 min-h-[800px] ">
+    <div className="p-4 w-full mt-20 min-h-[800px] bg-gradient-to-br from-indigo-900 via-purple-900 to-gray-300">
       
       <div className="flex justify-between items-center mb-6 gap-4 ">
         <h1 className="text-2xl font-bold text-white">All Books</h1>
-        {/* <Button className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2">
-          <Plus size={20} /> Add New Book
-        </Button> */}
 
 <Dialog>
       <form>
@@ -133,7 +130,7 @@ export default function BookList() {
         
       </div>
 
-      <Card className="overflow-x-auto bg-sky-900 backdrop-blur-md rounded-2xl shadow-xl">
+      <Card className="overflow-x-auto bg-white/5 backdrop-blur-md rounded-2xl shadow-xl">
         <CardContent className="p-0">
           <table className="min-w-full text-white">
             <thead className="bg-white/5">

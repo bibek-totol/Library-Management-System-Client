@@ -8,7 +8,7 @@ import im1 from "../assets/download.webp";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-800 backdrop-blur-md text-white py-6 fixed bottom-0 w-full mt-4 ">
+    <footer className="bg-violet-800 backdrop-blur-md text-white py-6   w-full ">
       <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
         
         <div>

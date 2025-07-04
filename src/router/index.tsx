@@ -1,7 +1,10 @@
-import Root from "@/component/Root";
-import BookList from "@/page/BookList";
-import BorrowSummary from "@/page/BorrowSummary";
-import Home from "@/page/Home";
+import { lazy} from "react";
+
+const Root = lazy(() => import("@/component/Root"));
+const BookList = lazy(() => import("@/page/BookList"));
+const BorrowSummary = lazy(() => import("@/page/BorrowSummary"));
+const Home = lazy(() => import("@/page/Home"));
+
 import {createBrowserRouter} from "react-router";
   
 
