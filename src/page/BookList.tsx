@@ -2,6 +2,18 @@ import { useState } from "react";
 import { Pencil, Trash2, BookOpen, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+  } from "@/components/ui/dialog"
+  import { Input } from "@/components/ui/input"
+  import { Label } from "@/components/ui/label"
 
 
 interface BookMock {
@@ -77,12 +89,48 @@ export default function BookList() {
   };
 
   return (
-    <div className="fixed top-0 bottom-2  p-4 w-full pb-40">
-      <div className="flex justify-between items-center mb-6">
+    <div className="p-4 w-full mt-20 min-h-[800px] ">
+      
+      <div className="flex justify-between items-center mb-6 gap-4 ">
         <h1 className="text-2xl font-bold text-white">All Books</h1>
-        <Button className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2">
+        {/* <Button className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2">
           <Plus size={20} /> Add New Book
-        </Button>
+        </Button> */}
+
+<Dialog>
+      <form>
+        <DialogTrigger asChild>
+          <Button className="bg-blue-800 hover:bg-blue-600 text-white" variant="outline">ADD NEW</Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit profile</DialogTitle>
+            <DialogDescription>
+              Make changes to your profile here. Click save when you&apos;re
+              done.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <div className="grid gap-3">
+              <Label htmlFor="name-1">Name</Label>
+              <Input id="name-1" name="name" defaultValue="Pedro Duarte" />
+            </div>
+            <div className="grid gap-3">
+              <Label htmlFor="username-1">Username</Label>
+              <Input id="username-1" name="username" defaultValue="@peduarte" />
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button type="submit">Save changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </form>
+    </Dialog>
+
+        
       </div>
 
       <Card className="overflow-x-auto bg-sky-900 backdrop-blur-md rounded-2xl shadow-xl">

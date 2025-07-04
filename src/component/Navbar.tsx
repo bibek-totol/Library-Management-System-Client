@@ -1,6 +1,8 @@
 
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import im1 from "../assets/download.webp";
+import { Link } from "react-router";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -10,22 +12,19 @@ const Navbar = () => {
   return (
     <nav className="bg-gray-800 backdrop-blur-md shadow-md fixed top-0 w-full z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div className="flex-shrink-0 text-xl font-bold text-white tracking-wide">
-            MyBrand
+        <div className="flex justify-between items-center h-20 ">
+          <div className="h-20 w-20">
+            <img src={im1} alt="Logo" className="h-full w-full rounded-full" />
           </div>
+          
 
           {/* Desktop Menu */}
           <div className="hidden md:flex space-x-6">
-            {["All Books", "Add Book",  "Borrow Summary"].map((item) => (
-              <a
-                key={item}
-                href={`#${item.split(" "). join("-").toLowerCase()}`}
-                className="text-white hover:text-blue-400 transition-colors font-medium"
-              >
+            {["Home", "All Books",  "Borrow Summary"].map((item) => (
+             
+              <Link key={item} to={`${item.split(" "). join("-").toLowerCase()}`}  className="text-white hover:text-blue-400 transition-colors font-medium">
                 {item}
-              </a>
+              </Link>
             ))}
           </div>
 

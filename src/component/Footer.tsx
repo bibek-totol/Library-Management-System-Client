@@ -4,14 +4,17 @@ import {
   Linkedin,
   Github,
 } from "lucide-react";
+import im1 from "../assets/download.webp";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-800 backdrop-blur-md text-white py-6 fixed bottom-0 w-full mt-4">
+    <footer className="bg-gray-800 backdrop-blur-md text-white py-6 fixed bottom-0 w-full mt-4 ">
       <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
         
         <div>
-          <h2 className="text-2xl font-bold">MyBrand</h2>
+        <div className="h-20 w-20">
+            <img src={im1} alt="Logo" className="h-full w-full rounded-full" />
+          </div>
           <p className="mt-2 text-sm text-gray-300">
             Creating intuitive digital experiences with modern design.
           </p>
