@@ -47,7 +47,7 @@ const borrowedSummaryMock = [
 
 export default function BorrowSummary() {
   return (
-    <div className="mt-20  md:p-8 bg-gradient-to-br from-indigo-900 via-purple-900 to-gray-300">
+    <div className="mt-20  md:p-8 bg-gradient-to-br from-indigo-900 via-purple-900 to-gray-300 p-4">
       <h1 className="text-2xl font-bold text-white mb-6">Borrowed Books Summary</h1>
 
       <Card className="overflow-x-auto bg-white/5 backdrop-blur-md rounded-2xl shadow-xl">

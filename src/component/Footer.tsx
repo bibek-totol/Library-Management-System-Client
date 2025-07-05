@@ -5,6 +5,7 @@ import {
   Github,
 } from "lucide-react";
 import im1 from "../assets/download.webp";
+import { Link } from "react-router";
 
 const Footer = () => {
   return (
@@ -23,14 +24,23 @@ const Footer = () => {
         
         <div className="flex flex-col space-y-2">
           <h3 className="text-lg font-semibold mb-1">Navigation</h3>
-          {["All Books", "Add Book",  "Borrow Summary"].map((link) => (
-            <a
+          <Link
+              
+              to= "/"
+    
+              className="text-gray-300 hover:text-blue-400 transition-colors"
+            >
+              Home
+            </Link>
+          {["Add Book",  "Borrow Summary"].map((link) => (
+            <Link
               key={link}
-              href={`#${link.toLowerCase()}`}
+              to={`${link.split(" "). join("-").toLowerCase()}`}
+    
               className="text-gray-300 hover:text-blue-400 transition-colors"
             >
               {link}
-            </a>
+            </Link>
           ))}
         </div>
 

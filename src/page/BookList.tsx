@@ -1,133 +1,210 @@
-import { useState } from "react";
-import { Pencil, Trash2, BookOpen, Plus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Pencil, Trash2, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-  } from "@/components/ui/dialog"
-  import { Input } from "@/components/ui/input"
-  import { Label } from "@/components/ui/label"
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
 
 
 interface BookMock {
-    id: number;
-    title: string;
-    author: string;
-    genre: string;
-    isbn: string;
-    copies: number;
-    available: boolean;
+  serial_id: number;
+  title: string;
+  author: string;
+  genre: string;
+  isbn: string;
+  copies: number;
+  available: boolean;
 }
 
-const booksMock: BookMock[] = [
-  {
-    id: 1,
-    title: "The Great Gatsby",
-    author: "F. Scott Fitzgerald",
-    genre: "Classic",
-    isbn: "9780743273565",
-    copies: 3,
-    available: true,
-  },
-  {
-    id: 2,
-    title: "1984",
-    author: "George Orwell",
-    genre: "Dystopian",
-    isbn: "9780451524935",
-    copies: 0,
-    available: false,
-  },
-
-  {
-    id: 3,
-    title: "1984",
-    author: "George Orwell",
-    genre: "Dystopian",
-    isbn: "9780451524935",
-    copies: 0,
-    available: false,
-  },
 
 
-  {
-    id: 4,
-    title: "1984",
-    author: "George Orwell",
-    genre: "Dystopian",
-    isbn: "9780451524935",
-    copies: 0,
-    available: false,
-  },
 
+export default  function BookList() {
+  const [books, setBooks] = useState<BookMock[]>([]);
 
-  {
-    id: 5,
-    title: "1984",
-    author: "George Orwell",
-    genre: "Dystopian",
-    isbn: "9780451524935",
-    copies: 0,
-    available: false,
-  },
-];
-
-export default function BookList() {
-  const [books, setBooks] = useState<BookMock[]>(booksMock);
-
-  const handleDelete = (id: number) => {
-    if (confirm("Are you sure you want to delete this book?")) {
-      setBooks(books.filter((book) => book.id !== id));
+  useEffect(() =>  {
+    const getBookdata = async () => {
+      const response = await fetch("http://localhost:3000/api/books");
+      const data = await response.json();
+      setBooks(data);
     }
+    getBookdata();
+  }, [books]);
+  
+  
+ 
+
+  const [newBook, setNewBook] = useState({
+    title: "",
+    author: "",
+    genre: "",
+    isbn: "",
+    copies: 0,
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewBook((prev) => ({
+      ...prev,
+      [name]: name === "copies" ? parseInt(value) : value,
+    }));
+  };
+
+
+ 
+
+
+  const handleAddBook = async(e: React.FormEvent) => {
+    e.preventDefault();
+
+    const bookToAdd: BookMock = {
+      serial_id: books.length + 1,
+      title: newBook.title,
+      author: newBook.author,
+      genre: newBook.genre,
+      isbn: newBook.isbn,
+      copies: newBook.copies,
+      available: newBook.copies > 0 ? true : false,
+    };
+
+    
+    
+
+    try{
+        const response = await fetch("http://localhost:3000/api/books", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(bookToAdd),
+        });
+
+       
+        const data = await response.json();
+        console.log(data);
+       
+
+    }catch(error){
+        console.error("Error adding book:", error);
+    } finally{
+        setNewBook({
+            title: "",
+            author: "",
+            genre: "",
+            isbn: "",
+            copies: 0,
+        });
+    }
+
+ 
+   
+  };
+
+  const handleDelete =  (id: number) => {
+    
+   fetch(`http://localhost:3000/api/books/${id}`, {
+      method: "DELETE",
+    })
+      .then((response) => response.json())
+      .then((data) => console.log(data))
+      .catch((error) => console.error("Error deleting book:", error));
+
+  
   };
 
   return (
     <div className="p-4 w-full mt-20 min-h-[800px] bg-gradient-to-br from-indigo-900 via-purple-900 to-gray-300">
-      
-      <div className="flex justify-between items-center mb-6 gap-4 ">
+      <div className="flex justify-between items-center mb-6 gap-4">
         <h1 className="text-2xl font-bold text-white">All Books</h1>
 
-<Dialog>
-      <form>
-        <DialogTrigger asChild>
-          <Button className="bg-blue-800 hover:bg-blue-600 text-white" variant="outline">ADD NEW</Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Edit profile</DialogTitle>
-            <DialogDescription>
-              Make changes to your profile here. Click save when you&apos;re
-              done.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4">
-            <div className="grid gap-3">
-              <Label htmlFor="name-1">Name</Label>
-              <Input id="name-1" name="name" defaultValue="Pedro Duarte" />
-            </div>
-            <div className="grid gap-3">
-              <Label htmlFor="username-1">Username</Label>
-              <Input id="username-1" name="username" defaultValue="@peduarte" />
-            </div>
-          </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button type="submit">Save changes</Button>
-          </DialogFooter>
-        </DialogContent>
-      </form>
-    </Dialog>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="bg-blue-800 hover:bg-blue-600 text-white" variant="outline">
+              ADD NEW BOOK
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[500px]">
+            <form onSubmit={handleAddBook}>
+              <DialogHeader>
+                <DialogTitle>Add New Book</DialogTitle>
+                <DialogDescription>Fill in the book details below.</DialogDescription>
+              </DialogHeader>
 
-        
+              <div className="grid gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    name="title"
+                    value={newBook?.title}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Atomic Habits"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="author">Author</Label>
+                  <Input
+                    name="author"
+                    value={newBook?.author}
+                    onChange={handleInputChange}
+                    placeholder="e.g., James Clear"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="genre">Genre</Label>
+                  <Input
+                    name="genre"
+                    value={newBook?.genre}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Self-help"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="isbn">ISBN(Unique)</Label>
+                  <Input
+                    name="isbn"
+                    value={newBook?.isbn}
+                    onChange={handleInputChange}
+                    placeholder="e.g., 9780735211292"
+                  />
+                </div>
+
+
+                
+
+                <div className="grid gap-2">
+                  <Label htmlFor="copies">Available Copies</Label>
+                  <Input
+                    name="copies"
+                    type="number"
+                    min={0}
+                    value={newBook?.copies}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+
+              <DialogFooter className="pt-4">
+                <DialogClose asChild>
+                  <Button variant="outline">Cancel</Button>
+                </DialogClose>
+                <Button type="submit" className="bg-green-700 text-white hover:bg-green-600">
+                  Save Book
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Card className="overflow-x-auto bg-white/5 backdrop-blur-md rounded-2xl shadow-xl">
@@ -145,15 +222,16 @@ export default function BookList() {
               </tr>
             </thead>
             <tbody>
-              {books.map((book) => (
-                <tr key={book.id} className="border-t border-white/10 hover:bg-white/5">
-                  <td className="px-4 py-3">{book.title}</td>
-                  <td className="px-4 py-3">{book.author}</td>
-                  <td className="px-4 py-3">{book.genre}</td>
-                  <td className="px-4 py-3">{book.isbn}</td>
-                  <td className="px-4 py-3">{book.copies}</td>
+
+              {books.length>0 ? books.map((book: BookMock) => (
+                <tr key={book?.serial_id} className="border-t border-white/10 hover:bg-white/5">
+                  <td className="px-4 py-3">{book?.title}</td>
+                  <td className="px-4 py-3">{book?.author}</td>
+                  <td className="px-4 py-3">{book?.genre}</td>
+                  <td className="px-4 py-3">{book?.isbn}</td>
+                  <td className="px-4 py-3">{book?.copies}</td>
                   <td className="px-4 py-3">
-                    {book.copies > 0 ? (
+                    {book?.available ? (
                       <span className="text-green-400">Available</span>
                     ) : (
                       <span className="text-red-400">Unavailable</span>
@@ -163,7 +241,12 @@ export default function BookList() {
                     <Button variant="ghost" size="icon" className="hover:text-yellow-400">
                       <Pencil size={18} />
                     </Button>
-                    <Button variant="ghost" size="icon" className="hover:text-red-500" onClick={() => handleDelete(book.id)}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="hover:text-red-500"
+                      onClick={() => handleDelete(book?.serial_id)}
+                    >
                       <Trash2 size={18} />
                     </Button>
                     <Button variant="ghost" size="icon" className="hover:text-blue-400">
@@ -171,7 +254,8 @@ export default function BookList() {
                     </Button>
                   </td>
                 </tr>
-              ))}
+
+              )): <tr><td className="px-4 py-3 text-2xl text-red-400 text-center" colSpan={7}> No books found</td></tr>}
             </tbody>
           </table>
         </CardContent>
