@@ -34,6 +34,40 @@ export default function BorrowSummary() {
     }
     getBookdata();
   }, [books]);
+
+
+  
+  const handleedit = async (book: BookMock, e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  const form = e.currentTarget;
+
+  const updatedBook = {
+    title: (form.elements.namedItem("title") as HTMLInputElement).value,
+    isbn: (form.elements.namedItem("isbn") as HTMLInputElement).value,
+    copies: parseInt((form.elements.namedItem("copies") as HTMLInputElement).value),
+  };
+
+  try {
+    const response = await fetch(`http://localhost:3000/api/edit-borrowsummary/${book.serial_id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedBook),
+    });
+
+    const data = await response.json();
+    console.log("Updated:", data);
+
+    
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+
+    
+  
   return (
     <div className="mt-20 min-h-screen  md:p-8 bg-gradient-to-br from-indigo-900 via-purple-900 to-gray-300 p-4">
       <h1 className="text-2xl font-bold text-white mb-6">Borrowed Books Summary</h1>
@@ -75,9 +109,9 @@ export default function BorrowSummary() {
                     </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
-            <form>
+            <form onSubmit={(e)=> handleedit(book,e)}>
               <DialogHeader>
-                <DialogTitle>Add New Book</DialogTitle>
+                <DialogTitle>Edit Book</DialogTitle>
                 <DialogDescription>Fill in the book details below.</DialogDescription>
               </DialogHeader>
 
@@ -86,10 +120,10 @@ export default function BorrowSummary() {
                   <Label htmlFor="title">Title</Label>
                   <Input
                     name="title"
-                    value={book?.title}
+                    defaultValue={book?.title}
                    
                     placeholder="e.g., Atomic Habits"
-                    readOnly
+                  
                   />
                 </div>
                 
@@ -99,10 +133,10 @@ export default function BorrowSummary() {
                   <Label htmlFor="isbn">ISBN(Unique)</Label>
                   <Input
                     name="isbn"
-                    value={book?.isbn}
+                    defaultValue={book?.isbn}
                    
                     placeholder="e.g., 9780735211292"
-                    readOnly
+                   
                   />
                 </div>
 
@@ -115,9 +149,9 @@ export default function BorrowSummary() {
                     name="copies"
                     type="number"
                     min={0}
-                    value={book?.copies}
+                    defaultValue={book?.copies}
                     
-                    readOnly
+                   
                   />
                 </div>
               </div>
@@ -127,7 +161,7 @@ export default function BorrowSummary() {
                   <Button variant="ghost">Cancel</Button>
                 </DialogClose>
                 <Button type="submit" className="bg-green-700 text-white hover:bg-green-600">
-                  Complete Borrow Book
+                  Edit
                 </Button>
               </DialogFooter>
             </form>

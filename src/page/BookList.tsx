@@ -127,6 +127,38 @@ export default  function BookList() {
     [books.length, newBook] 
   );
 
+
+  const handleedit = async (book: BookMock, e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+  
+    const updatedBook = {
+      title: (form.elements.namedItem("title") as HTMLInputElement).value,
+      author: (form.elements.namedItem("author") as HTMLInputElement).value,
+      genre: (form.elements.namedItem("genre") as HTMLInputElement).value,
+      isbn: (form.elements.namedItem("isbn") as HTMLInputElement).value,
+      copies: parseInt((form.elements.namedItem("copies") as HTMLInputElement).value),
+    };
+  
+    try {
+      const response = await fetch(`http://localhost:3000/api/edit-books/${book.serial_id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedBook),
+      });
+  
+      const data = await response.json();
+      console.log("Updated:", data);
+  
+      
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  
+
   
 
   return (
@@ -137,7 +169,7 @@ export default  function BookList() {
         <Dialog>
           <DialogTrigger asChild>
             <Button className="bg-blue-800 hover:bg-blue-600 text-white" variant="outline">
-              ADD NEW BOOK
+              ADD BOOKS
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
@@ -244,9 +276,87 @@ export default  function BookList() {
                     )}
                   </td>
                   <td className="px-4 py-3 space-x-2">
-                    <Button variant="ghost" size="icon" className="hover:text-yellow-400">
+                    
+
+
+
+                    <Dialog>
+          <DialogTrigger asChild>
+             <Button variant="ghost" size="icon" className="hover:text-yellow-400">
                       <Pencil size={18} />
                     </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[500px]">
+            <form onSubmit={(e) =>handleedit(book, e)}>
+              <DialogHeader>
+                <DialogTitle>Edit Book</DialogTitle>
+                <DialogDescription>Fill in the book details below.</DialogDescription>
+              </DialogHeader>
+
+              <div className="grid gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    name="title"
+                    defaultValue={book?.title}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Atomic Habits"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="author">Author</Label>
+                  <Input
+                    name="author"
+                    defaultValue={book?.author}
+                    onChange={handleInputChange}
+                    placeholder="e.g., James Clear"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="genre">Genre</Label>
+                  <Input
+                    name="genre"
+                    defaultValue={book?.genre}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Self-help"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="isbn">ISBN(Unique)</Label>
+                  <Input
+                    name="isbn"
+                    defaultValue={book?.isbn}
+                    onChange={handleInputChange}
+                    placeholder="e.g., 9780735211292"
+                  />
+                </div>
+
+
+                
+
+                <div className="grid gap-2">
+                  <Label htmlFor="copies">Available Copies</Label>
+                  <Input
+                    name="copies"
+                    type="number"
+                    min={0}
+                    defaultValue={book?.copies}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+
+              <DialogFooter className="pt-4">
+                <DialogClose asChild>
+                  <Button variant="outline">Cancel</Button>
+                </DialogClose>
+                <Button type="submit" className="bg-green-700 text-white hover:bg-green-600">
+                  Edit
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
 
 
                     <Button
