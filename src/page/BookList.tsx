@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect,useCallback } from "react";
 import { Pencil, Trash2, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,24 +14,19 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type BookMock from "@/type-interfaces";
+import { deleteItem } from "@/hook/deleteItem";
 
 
-
-interface BookMock {
-  serial_id: number;
-  title: string;
-  author: string;
-  genre: string;
-  isbn: string;
-  copies: number;
-  available: boolean;
-}
 
 
 
 
 export default  function BookList() {
   const [books, setBooks] = useState<BookMock[]>([]);
+  const [selectedBook, setSelectedBook] = useState<BookMock | null>(null);
+  const [viewstate, setViewstate] = useState<Boolean>(true);
+
 
   useEffect(() =>  {
     const getBookdata = async () => {
@@ -53,75 +48,86 @@ export default  function BookList() {
     copies: 0,
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setNewBook((prev) => ({
-      ...prev,
-      [name]: name === "copies" ? parseInt(value) : value,
-    }));
-  };
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      setNewBook((prev) => ({
+        ...prev,
+        [name]: name === "copies" ? parseInt(value) : value,
+      }));
+    },
+    [] 
+  );
 
 
  
+  
 
-
-  const handleAddBook = async(e: React.FormEvent) => {
-    e.preventDefault();
-
-    const bookToAdd: BookMock = {
-      serial_id: books.length + 1,
-      title: newBook.title,
-      author: newBook.author,
-      genre: newBook.genre,
-      isbn: newBook.isbn,
-      copies: newBook.copies,
-      available: newBook.copies > 0 ? true : false,
-    };
-
-    
-    
-
-    try{
-        const response = await fetch("http://localhost:3000/api/books", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(bookToAdd),
+  const handleAddBorrow = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!selectedBook) return;
+  
+      try {
+        const response = await fetch("http://localhost:3000/api/borrow", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(selectedBook),
         });
-
-       
         const data = await response.json();
         console.log(data);
-       
-
-    }catch(error){
+      } catch (error) {
         console.error("Error adding book:", error);
-    } finally{
-        setNewBook({
-            title: "",
-            author: "",
-            genre: "",
-            isbn: "",
-            copies: 0,
+      } finally {
+        setViewstate(false);
+      }
+    },
+    [selectedBook] 
+  );
+  
+  const handleAddBook = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+  
+      const bookToAdd: BookMock = {
+        serial_id: books.length + 1,
+        title: newBook.title,
+        author: newBook.author,
+        genre: newBook.genre,
+        isbn: newBook.isbn,
+        copies: newBook.copies,
+        available: newBook.copies > 0 ? true : false,
+      };
+  
+      try {
+        const response = await fetch("http://localhost:3000/api/books", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(bookToAdd),
         });
-    }
-
- 
-   
-  };
-
-  const handleDelete =  (id: number) => {
-    
-   fetch(`http://localhost:3000/api/books/${id}`, {
-      method: "DELETE",
-    })
-      .then((response) => response.json())
-      .then((data) => console.log(data))
-      .catch((error) => console.error("Error deleting book:", error));
+  
+        const data = await response.json();
+        console.log(data);
+      } catch (error) {
+        console.error("Error adding book:", error);
+      } finally {
+        setNewBook({
+          title: "",
+          author: "",
+          genre: "",
+          isbn: "",
+          copies: 0,
+        });
+      }
+    },
+    [books.length, newBook] 
+  );
 
   
-  };
 
   return (
     <div className="p-4 w-full mt-20 min-h-[800px] bg-gradient-to-br from-indigo-900 via-purple-900 to-gray-300">
@@ -241,17 +247,91 @@ export default  function BookList() {
                     <Button variant="ghost" size="icon" className="hover:text-yellow-400">
                       <Pencil size={18} />
                     </Button>
+
+
                     <Button
                       variant="ghost"
                       size="icon"
                       className="hover:text-red-500"
-                      onClick={() => handleDelete(book?.serial_id)}
+                      onClick={() => deleteItem(book?.serial_id,"books")}
                     >
                       <Trash2 size={18} />
                     </Button>
-                    <Button variant="ghost" size="icon" className="hover:text-blue-400">
+
+{
+  viewstate? (
+    <Dialog>
+          <DialogTrigger asChild>
+           
+            <Button onClick={() => setSelectedBook(book)} variant="ghost" size="icon" className="hover:text-blue-400">
                       <BookOpen size={18} />
                     </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[500px]">
+            <form onSubmit= {handleAddBorrow}>
+              <DialogHeader>
+                <DialogTitle>Add New Book</DialogTitle>
+                <DialogDescription>Fill in the book details below.</DialogDescription>
+              </DialogHeader>
+
+              <div className="grid gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    name="title"
+                    value={book?.title}
+                   
+                    placeholder="e.g., Atomic Habits"
+                    readOnly
+                  />
+                </div>
+                
+
+                
+                <div className="grid gap-2">
+                  <Label htmlFor="isbn">ISBN(Unique)</Label>
+                  <Input
+                    name="isbn"
+                    value={book?.isbn}
+                   
+                    placeholder="e.g., 9780735211292"
+                    readOnly
+                  />
+                </div>
+
+
+                
+
+                <div className="grid gap-2">
+                  <Label htmlFor="copies">Available Copies</Label>
+                  <Input
+                    name="copies"
+                    type="number"
+                    min={0}
+                    value={book?.copies}
+                    
+                    readOnly
+                  />
+                </div>
+              </div>
+
+              <DialogFooter className="pt-4">
+                <DialogClose asChild>
+                  <Button variant="ghost">Cancel</Button>
+                </DialogClose>
+                <Button type="submit" className="bg-green-700 text-white hover:bg-green-600">
+                  Complete Borrow Book
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+  ): null
+}
+                    
+
+
+
                   </td>
                 </tr>
 

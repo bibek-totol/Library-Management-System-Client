@@ -32,7 +32,7 @@ const Footer = () => {
             >
               Home
             </Link>
-          {["Add Book",  "Borrow Summary"].map((link) => (
+          {["All Books",  "Borrow Summary"].map((link) => (
             <Link
               key={link}
               to={`${link.split(" "). join("-").toLowerCase()}`}
