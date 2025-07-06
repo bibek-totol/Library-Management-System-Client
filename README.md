@@ -191,13 +191,13 @@ MONGODB_URI=mongodb://localhost:27017/libraryDB
 ├── 📁 pages
 ├── 📁 features (RTK Query slices)
 ├── 📁 assets
-└── 📄 main.tsx
+└── 📄 router
 
 📁 server
 ├── 📁 controllers
 ├── 📁 models
 ├── 📁 routes
-├── 📁 middlewares
+├── 📁 config
 └── 📄 server.js
 ```
 
