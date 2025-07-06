@@ -111,8 +111,9 @@ export default  function BookList() {
   
       try {
         await addBorrow(borrowData).unwrap();
+        toast.success("Book borrowed successfully!");
       } catch (error) {
-        console.error("Error adding book:", error);
+        toast.error("Error borrowing book");
       } 
     },
     [selectedBook] 
