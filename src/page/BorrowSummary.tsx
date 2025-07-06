@@ -1,10 +1,10 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import type BookMock from "@/type-interfaces";
-import { useState, useEffect } from "react";
+import { useCallback, useState} from "react";
 import { Pencil, Trash2, } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { deleteItem } from "@/hook/deleteItem";
+
 
 import {
   Dialog,
@@ -18,23 +18,22 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useGetBorrowBooksQuery, useDeleteBorrowBooksMutation, useEditBorrowBooksMutation } from "@/features/borrowApi";
 
 
 
 
 
 export default function BorrowSummary() {
-  const [books, setBooks] = useState<(BookMock & { quantity: number })[]>([]);
+  // const [books, setBooks] = useState<(BookMock & { quantity: number })[]>([]);
+
+  const { data: books = [] , isLoading, isError } = useGetBorrowBooksQuery();
+
+  const [deleteBorrowBooks] = useDeleteBorrowBooksMutation();
+  const [editBorrowBooks] = useEditBorrowBooksMutation();
 
 
-  useEffect(() =>  {
-    const getBookdata = async () => {
-      const response = await fetch("http://localhost:3000/api/borrowsummary");
-      const data = await response.json();
-      setBooks(data);
-    }
-    getBookdata();
-  }, [books]);
+ 
 
 
   
@@ -45,20 +44,11 @@ export default function BorrowSummary() {
   const updatedBook = {
     title: (form.elements.namedItem("title") as HTMLInputElement).value,
     isbn: (form.elements.namedItem("isbn") as HTMLInputElement).value,
-    copies: parseInt((form.elements.namedItem("copies") as HTMLInputElement).value),
+    quantity: parseInt((form.elements.namedItem("quantity") as HTMLInputElement).value),
   };
 
   try {
-    const response = await fetch(`http://localhost:3000/api/edit-borrowsummary/${book.serial_id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedBook),
-    });
-
-    const data = await response.json();
-    console.log("Updated:", data);
+    await editBorrowBooks({ id: book.serial_id, data: updatedBook }).unwrap();
 
     
   } catch (error) {
@@ -66,6 +56,18 @@ export default function BorrowSummary() {
   }
 };
 
+
+
+const handleDelete = useCallback(
+  async (id: number) => {
+    try {
+      await deleteBorrowBooks({ id }).unwrap();
+    } catch (error) {
+      console.error("Error deleting book:", error);
+    }
+  },
+  [deleteBorrowBooks]
+);
 
     
   
@@ -97,7 +99,7 @@ export default function BorrowSummary() {
                       variant="ghost"
                       size="icon"
                       className="hover:text-red-500"
-                      onClick={() => deleteItem(book?.serial_id, "borrow")}
+                      onClick={() => handleDelete(book?.serial_id)}
                     >
                       <Trash2 size={18} />
                     </Button>
@@ -145,12 +147,12 @@ export default function BorrowSummary() {
                 
 
                 <div className="grid gap-2">
-                  <Label htmlFor="copies">Available Copies</Label>
+                  <Label htmlFor="copies">Total Quantity</Label>
                   <Input
-                    name="copies"
+                    name="quantity"
                     type="number"
                     min={0}
-                    defaultValue={book?.copies}
+                    defaultValue={book?.quantity}
                     
                    
                   />

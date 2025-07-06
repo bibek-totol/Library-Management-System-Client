@@ -1,4 +1,4 @@
-import { useState, useEffect,useCallback } from "react";
+import { useState,useCallback } from "react";
 import { Pencil, Trash2, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,35 +15,20 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type BookMock from "@/type-interfaces";
-import { deleteItem } from "@/hook/deleteItem";
-
-
-
-
-
-
-
-
+import { useAddBooksMutation, useDeleteBooksMutation, useEditBooksMutation, useGetBooksQuery } from "@/features/booksApi";
+import { useAddBorrowBooksMutation } from "@/features/borrowApi";
 
 
 export default  function BookList() {
-  const [books, setBooks] = useState<BookMock[]>([]);
   const [selectedBook, setSelectedBook] = useState<BookMock | null>(null);
- 
   // const [viewstate, setViewstate] = useState<Boolean>(true);
+
+  const { data: books = [], isLoading, isError } = useGetBooksQuery();
+  const [addBook] = useAddBooksMutation();
+  const [editBook] = useEditBooksMutation();
+  const [deleteBooks] = useDeleteBooksMutation();
+  const [addBorrow] = useAddBorrowBooksMutation();
  
-
-
-  useEffect(() =>  {
-    const getBookdata = async () => {
-      const response = await fetch("http://localhost:3000/api/books");
-      const data = await response.json();
-      setBooks(data);
-    }
-    getBookdata();
-  }, [books]);
-  
-  
  
 
   const [newBook, setNewBook] = useState({
@@ -67,12 +52,18 @@ export default  function BookList() {
 
 
   
+  const handleDelete = useCallback(
+    async (id: number) => {
+      try {
+        await deleteBooks({ id }).unwrap();
+      } catch (error) {
+        console.error("Error deleting book:", error);
+      }
+    },
+    [deleteBooks] 
+  );
 
   
-
-
-
- 
   
 
   const handleAddBorrow = useCallback(async (e: React.FormEvent) => {
@@ -92,21 +83,11 @@ export default  function BookList() {
 
 
   
-
-
    const borrowData = {...selectedBook, quantity, due_date};
       
   
       try {
-        const response = await fetch("http://localhost:3000/api/borrow", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(borrowData),
-        });
-        const data = await response.json();
-        console.log(data);
+        await addBorrow(borrowData).unwrap();
       } catch (error) {
         console.error("Error adding book:", error);
       } 
@@ -129,19 +110,7 @@ export default  function BookList() {
       };
   
       try {
-        const response = await fetch("http://localhost:3000/api/books", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(bookToAdd),
-        });
-  
-        const data = await response.json();
-        console.log(data);
-      } catch (error) {
-        console.error("Error adding book:", error);
-      } finally {
+        await addBook(bookToAdd).unwrap();
         setNewBook({
           title: "",
           author: "",
@@ -149,9 +118,11 @@ export default  function BookList() {
           isbn: "",
           copies: 0,
         });
-      }
+      } catch (error) {
+        console.error("Error adding book:", error);
+      } 
     },
-    [books.length, newBook] 
+    [addBook, newBook] 
   );
 
 
@@ -168,16 +139,7 @@ export default  function BookList() {
     };
   
     try {
-      const response = await fetch(`http://localhost:3000/api/edit-books/${book.serial_id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedBook),
-      });
-  
-      const data = await response.json();
-      console.log("Updated:", data);
+      await editBook({ id: book.serial_id, data: updatedBook }).unwrap();
   
       
     } catch (error) {
@@ -390,7 +352,7 @@ export default  function BookList() {
                       variant="ghost"
                       size="icon"
                       className="hover:text-red-500"
-                      onClick={() => deleteItem(book?.serial_id,"books")}
+                      onClick={() => handleDelete(book?.serial_id)}
                     >
                       <Trash2 size={18} />
                     </Button>
@@ -437,8 +399,6 @@ export default  function BookList() {
                 </div>
                 
                 
-
-
                 
 
                 <div className="grid gap-2">
@@ -447,10 +407,7 @@ export default  function BookList() {
                     name="quantity"
                     type="number"
                     min={0}
-                  
-                    
-                   
-                    
+                                 
                    
                   />
                 </div>
