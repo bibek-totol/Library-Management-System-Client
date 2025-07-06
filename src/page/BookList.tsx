@@ -17,17 +17,22 @@ import { Label } from "@/components/ui/label";
 import type BookMock from "@/type-interfaces";
 import { useAddBooksMutation, useDeleteBooksMutation, useEditBooksMutation, useGetBooksQuery } from "@/features/booksApi";
 import { useAddBorrowBooksMutation } from "@/features/borrowApi";
+import LoadingPage from "@/component/LoadingPage";
+import { toast } from 'react-toastify';
 
 
 export default  function BookList() {
   const [selectedBook, setSelectedBook] = useState<BookMock | null>(null);
   // const [viewstate, setViewstate] = useState<Boolean>(true);
 
-  const { data: books = [], isLoading, isError } = useGetBooksQuery();
+  const { data: books = [], isLoading, isError, } = useGetBooksQuery();
   const [addBook] = useAddBooksMutation();
   const [editBook] = useEditBooksMutation();
   const [deleteBooks] = useDeleteBooksMutation();
   const [addBorrow] = useAddBorrowBooksMutation();
+
+  
+  
  
  
 
@@ -56,6 +61,7 @@ export default  function BookList() {
     async (id: number) => {
       try {
         await deleteBooks({ id }).unwrap();
+        toast.warning("Book deleted successfully!");
       } catch (error) {
         console.error("Error deleting book:", error);
       }
@@ -70,13 +76,30 @@ export default  function BookList() {
       e.preventDefault();
       if (!selectedBook) return;
 
+      if(selectedBook.available === false) {
+        toast.error("Book is not available for borrowing");
+        return;
+      }
+
    const form = e.currentTarget as HTMLFormElement;
 
   const quantity = parseInt((form.elements.namedItem("quantity") as HTMLInputElement).value);
   const due_date = (form.elements.namedItem("due_date") as HTMLInputElement).value;
 
   if(quantity > selectedBook.copies) {
-    alert("Not enough copies available");
+    toast.error("Quantity exceeds available copies");
+    form.reset();
+    return;
+  }
+
+  if(quantity <= 0) {
+    toast.error("Quantity must be greater than 0");
+    form.reset();
+    return;
+  }
+
+  if(!due_date) {
+    toast.error("Due date is required");
     form.reset();
     return;
   }
@@ -111,6 +134,7 @@ export default  function BookList() {
   
       try {
         await addBook(bookToAdd).unwrap();
+        toast.success("Book added successfully!");
         setNewBook({
           title: "",
           author: "",
@@ -118,8 +142,10 @@ export default  function BookList() {
           isbn: "",
           copies: 0,
         });
-      } catch (error) {
-        console.error("Error adding book:", error);
+      } catch (error: any) {
+        toast.error(error.data.message);
+       
+
       } 
     },
     [addBook, newBook] 
@@ -139,11 +165,18 @@ export default  function BookList() {
     };
   
     try {
+
+      if(book.title === updatedBook.title && book.author === updatedBook.author && book.genre === updatedBook.genre && book.isbn === updatedBook.isbn && book.copies === updatedBook.copies) {
+        toast.error("No changes made");
+        return;
+      }
       await editBook({ id: book.serial_id, data: updatedBook }).unwrap();
+      toast.success("Book updated successfully!");
   
       
-    } catch (error) {
-      console.error(error);
+    } catch (error:any) {
+      toast.error(error.data.message);
+     
     }
   };
   
@@ -288,6 +321,7 @@ export default  function BookList() {
                   <Input
                     name="title"
                     defaultValue={book?.title}
+                    required
                     onChange={handleInputChange}
                     placeholder="e.g., Atomic Habits"
                   />
@@ -297,6 +331,7 @@ export default  function BookList() {
                   <Input
                     name="author"
                     defaultValue={book?.author}
+                    required
                     onChange={handleInputChange}
                     placeholder="e.g., James Clear"
                   />
@@ -306,6 +341,7 @@ export default  function BookList() {
                   <Input
                     name="genre"
                     defaultValue={book?.genre}
+                    required
                     onChange={handleInputChange}
                     placeholder="e.g., Self-help"
                   />
@@ -315,6 +351,7 @@ export default  function BookList() {
                   <Input
                     name="isbn"
                     defaultValue={book?.isbn}
+                    required
                     onChange={handleInputChange}
                     placeholder="e.g., 9780735211292"
                   />
@@ -328,6 +365,7 @@ export default  function BookList() {
                   <Input
                     name="copies"
                     type="number"
+                    required
                     min={0}
                     defaultValue={book?.copies}
                     onChange={handleInputChange}

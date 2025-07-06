@@ -1,7 +1,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import type BookMock from "@/type-interfaces";
-import { useCallback, useState} from "react";
+import { useCallback} from "react";
 import { Pencil, Trash2, } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useGetBorrowBooksQuery, useDeleteBorrowBooksMutation, useEditBorrowBooksMutation } from "@/features/borrowApi";
-
+import { toast } from 'react-toastify';
 
 
 
@@ -48,11 +48,17 @@ export default function BorrowSummary() {
   };
 
   try {
+
+    if(book.title === updatedBook.title && book.isbn === updatedBook.isbn && book.quantity === updatedBook.quantity) {
+      toast.error("No changes made");
+      return;
+    }
     await editBorrowBooks({ id: book.serial_id, data: updatedBook }).unwrap();
+    toast.success("Book updated successfully!");
 
     
   } catch (error) {
-    console.error(error);
+    toast.error("Error updating book");
   }
 };
 
@@ -62,8 +68,9 @@ const handleDelete = useCallback(
   async (id: number) => {
     try {
       await deleteBorrowBooks({ id }).unwrap();
+      toast.success("Book deleted successfully!");
     } catch (error) {
-      console.error("Error deleting book:", error);
+      toast.error("Error deleting book");
     }
   },
   [deleteBorrowBooks]
