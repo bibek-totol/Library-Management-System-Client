@@ -22,10 +22,16 @@ import { deleteItem } from "@/hook/deleteItem";
 
 
 
+
+
+
+
 export default  function BookList() {
   const [books, setBooks] = useState<BookMock[]>([]);
   const [selectedBook, setSelectedBook] = useState<BookMock | null>(null);
-  const [viewstate, setViewstate] = useState<Boolean>(true);
+ 
+  // const [viewstate, setViewstate] = useState<Boolean>(true);
+ 
 
 
   useEffect(() =>  {
@@ -60,13 +66,36 @@ export default  function BookList() {
   );
 
 
+  
+
+  
+
+
+
  
   
 
-  const handleAddBorrow = useCallback(
-    async (e: React.FormEvent) => {
+  const handleAddBorrow = useCallback(async (e: React.FormEvent) => {
       e.preventDefault();
       if (!selectedBook) return;
+
+   const form = e.currentTarget as HTMLFormElement;
+
+  const quantity = parseInt((form.elements.namedItem("quantity") as HTMLInputElement).value);
+  const due_date = (form.elements.namedItem("due_date") as HTMLInputElement).value;
+
+  if(quantity > selectedBook.copies) {
+    alert("Not enough copies available");
+    form.reset();
+    return;
+  }
+
+
+  
+
+
+   const borrowData = {...selectedBook, quantity, due_date};
+      
   
       try {
         const response = await fetch("http://localhost:3000/api/borrow", {
@@ -74,15 +103,13 @@ export default  function BookList() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(selectedBook),
+          body: JSON.stringify(borrowData),
         });
         const data = await response.json();
         console.log(data);
       } catch (error) {
         console.error("Error adding book:", error);
-      } finally {
-        setViewstate(false);
-      }
+      } 
     },
     [selectedBook] 
   );
@@ -368,8 +395,7 @@ export default  function BookList() {
                       <Trash2 size={18} />
                     </Button>
 
-{
-  viewstate? (
+
     <Dialog>
           <DialogTrigger asChild>
            
@@ -378,9 +404,9 @@ export default  function BookList() {
                     </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
-            <form onSubmit= {handleAddBorrow}>
+            <form onSubmit= {(e) =>handleAddBorrow (e)}>
               <DialogHeader>
-                <DialogTitle>Add New Book</DialogTitle>
+                <DialogTitle>Borrow Book</DialogTitle>
                 <DialogDescription>Fill in the book details below.</DialogDescription>
               </DialogHeader>
 
@@ -395,32 +421,37 @@ export default  function BookList() {
                     readOnly
                   />
                 </div>
-                
 
-                
+
                 <div className="grid gap-2">
-                  <Label htmlFor="isbn">ISBN(Unique)</Label>
+                  <Label htmlFor="title">Due Date</Label>
                   <Input
-                    name="isbn"
-                    value={book?.isbn}
+                    name="due_date"
                    
-                    placeholder="e.g., 9780735211292"
-                    readOnly
+                   
+                    type="date"
+                    
+                    placeholder="ex:02/02/2023"
+                    
                   />
                 </div>
+                
+                
 
 
                 
 
                 <div className="grid gap-2">
-                  <Label htmlFor="copies">Available Copies</Label>
+                  <Label htmlFor="copies">Quantity</Label>
                   <Input
-                    name="copies"
+                    name="quantity"
                     type="number"
                     min={0}
-                    value={book?.copies}
+                  
                     
-                    readOnly
+                   
+                    
+                   
                   />
                 </div>
               </div>
@@ -436,8 +467,7 @@ export default  function BookList() {
             </form>
           </DialogContent>
         </Dialog>
-  ): null
-}
+  
                     
 
 

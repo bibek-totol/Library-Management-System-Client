@@ -24,7 +24,8 @@ import { Label } from "@/components/ui/label";
 
 
 export default function BorrowSummary() {
-  const [books, setBooks] = useState<BookMock[]>([]);
+  const [books, setBooks] = useState<(BookMock & { quantity: number })[]>([]);
+
 
   useEffect(() =>  {
     const getBookdata = async () => {
@@ -88,7 +89,7 @@ export default function BorrowSummary() {
                 <tr key={index} className="border-t border-white/10 hover:bg-white/5">
                   <td className="px-4 py-3">{book?.title}</td>
                   <td className="px-4 py-3">{book?.isbn}</td>
-                  <td className="px-4 py-3">{book?.copies}</td>
+                  <td className="px-4 py-3">{book?.quantity}</td>
                   { <td className="px-4 py-3">
 
 
