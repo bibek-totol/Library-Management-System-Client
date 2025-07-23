@@ -6,6 +6,7 @@ export  default interface BookMock {
     isbn: string;
     copies: number;
     available: boolean;
+    quantity?: number;
     
   }
 
