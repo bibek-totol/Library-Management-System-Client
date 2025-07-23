@@ -181,6 +181,7 @@ export default  function BookList() {
       }
       await editBook({ id: book.serial_id, data: updatedBook }).unwrap();
       toast.success("Book updated successfully!");
+      closedialogRef.current?.click();
   
       
     } catch (error:any) {
@@ -300,7 +301,7 @@ export default  function BookList() {
                   <td className="px-4 py-3">{book?.isbn}</td>
                   <td className="px-4 py-3">{book?.copies}</td>
                   <td className="px-4 py-3">
-                    {book?.available ? (
+                    {book?.copies>0 ? (
                       <span className="text-green-400">Available</span>
                     ) : (
                       <span className="text-red-400">Unavailable</span>
@@ -384,7 +385,7 @@ export default  function BookList() {
 
               <DialogFooter className="pt-4">
                 <DialogClose asChild>
-                  <Button variant="outline">Cancel</Button>
+                  <Button ref={closedialogRef} variant="outline">Cancel</Button>
                 </DialogClose>
                 <Button type="submit" className="bg-green-700 text-white hover:bg-green-600">
                   Edit
