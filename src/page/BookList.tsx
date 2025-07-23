@@ -1,4 +1,4 @@
-import { useState,useCallback } from "react";
+import { useState,useCallback,useRef } from "react";
 import { Pencil, Trash2, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,9 +23,9 @@ import { toast } from 'react-toastify';
 
 export default  function BookList() {
   const [selectedBook, setSelectedBook] = useState<BookMock | null>(null);
-  // const [viewstate, setViewstate] = useState<Boolean>(true);
+  const closedialogRef = useRef<HTMLButtonElement>(null);
 
-  const { data: books = [], isLoading, isError, } = useGetBooksQuery();
+  const { data: books = [], isLoading} = useGetBooksQuery();
   const [addBook] = useAddBooksMutation();
   const [editBook] = useEditBooksMutation();
   const [deleteBooks] = useDeleteBooksMutation();
@@ -122,6 +122,11 @@ export default  function BookList() {
   const handleAddBook = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
+
+      if(newBook.title === "" || newBook.author === "" || newBook.genre === "" || newBook.isbn === "" || newBook.copies === 0) {
+        toast.error("All fields are required");
+        return;
+      }
   
       const bookToAdd: BookMock = {
         serial_id: books.length + 1,
@@ -132,10 +137,13 @@ export default  function BookList() {
         copies: newBook.copies,
         available: newBook.copies > 0 ? true : false,
       };
+
+  
   
       try {
         await addBook(bookToAdd).unwrap();
         toast.success("Book added successfully!");
+        closedialogRef.current?.click();
         setNewBook({
           title: "",
           author: "",
@@ -257,7 +265,7 @@ export default  function BookList() {
 
               <DialogFooter className="pt-4">
                 <DialogClose asChild>
-                  <Button variant="outline">Cancel</Button>
+                  <Button ref={closedialogRef} variant="outline">Cancel</Button>
                 </DialogClose>
                 <Button type="submit" className="bg-green-700 text-white hover:bg-green-600">
                   Save Book
@@ -284,7 +292,7 @@ export default  function BookList() {
             </thead>
             <tbody>
 
-              {books.length>0 ? books.map((book: BookMock) => (
+              {books.length>0 || !isLoading ? books.map((book: BookMock) => (
                 <tr key={book?.serial_id} className="border-t border-white/10 hover:bg-white/5">
                   <td className="px-4 py-3">{book?.title}</td>
                   <td className="px-4 py-3">{book?.author}</td>
@@ -471,7 +479,7 @@ export default  function BookList() {
                   </td>
                 </tr>
 
-              )): <tr><td className="px-4 py-3 text-2xl text-red-400 text-center" colSpan={7}> No books found</td></tr>}
+              )):(<tr><td className="px-4 py-3 text-2xl text-red-400 text-center" colSpan={7}> No books found <LoadingPage /></td></tr>)}
             </tbody>
           </table>
         </CardContent>
