@@ -27,7 +27,7 @@ import { toast } from 'react-toastify';
 export default function BorrowSummary() {
   // const [books, setBooks] = useState<(BookMock & { quantity: number })[]>([]);
 
-  const { data: books = [] , isLoading, isError } = useGetBorrowBooksQuery();
+  const { data: books = [] } = useGetBorrowBooksQuery();
 
   const [deleteBorrowBooks] = useDeleteBorrowBooksMutation();
   const [editBorrowBooks] = useEditBorrowBooksMutation();
