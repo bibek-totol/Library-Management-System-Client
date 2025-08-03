@@ -232,19 +232,6 @@ MONGODB_URI=mongodb://localhost:27017/libraryDB
 
 ---
 
-## 📄 License
-
-This project is licensed under the **MIT License**. See the [LICENSE](./LICENSE) file for more info.
-
----
-
-## 🌐 References (for Inspiration Only)
-
-- https://booklovers.ancorathemes.com/
-- https://preview.themeforest.net/item/printpress-book-publishing-wordpress-theme
-
----
-
 > 🎯 _Built for learning, prototyping, and internal use. Not production-ready without further enhancements (authentication, validation, access control)._
     
 
